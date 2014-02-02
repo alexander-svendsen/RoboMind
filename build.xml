@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="MonitorSensors" basedir="." default="copy">
+<project name="RoboMind" basedir="." default="copy">
     <property name="source.dir"     value="src"/>
     <property name="lib.dir"        value="../../git/ev3/ev3classes"/>
+    <property name="gson.lib"       value="src/lib/gson"/>
     <property name="class.dir"      value="build"/>
     <property name="jar.dir"        value="dist"/>
-    <property name="main-class"     value="src.MonitorSensors"/>
+    <property name="main-class"     value="src.RoboMindStartup"/>
     <property name="lejos.home"     value="/home/root/lejos"/>
     <property name="ev3.host"       value="10.0.1.1"/>
 
@@ -13,6 +14,13 @@
             <include name="*.jar"/>
         </fileset>
     </path>
+
+    <path id="gson.path">
+        <fileset dir="${gson.lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
 
     <target name="clean" description="delete old files">
         <delete dir="${class.dir}"/>
@@ -23,6 +31,7 @@
         <mkdir dir="${class.dir}"/>
         <javac srcdir="${source.dir}" destdir="${class.dir}">
             <classpath refid="libraries.path"/>
+            <classpath refid="gson.path"/>
         </javac>
     </target>
 
@@ -31,7 +40,11 @@
         <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${class.dir}">
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
-                <attribute name="Class-Path" value="${lejos.home}/lib/ev3classes.jar ${lejos.home}/libjna/usr/share/java/jna.jar"/>
+                <attribute name="Class-Path" value="${lejos.home}/lib/ev3classes.jar
+                                                    ${lejos.home}/lib/gson/gson.jar
+                                                    ${lejos.home}/libjna/usr/share/java/jna.jar"
+
+                />
             </manifest>
         </jar>  
     </target>
