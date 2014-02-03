@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-    <project name="lib_build" basedir="." default="copy" description="Copy over the contents of the lib folder to the EV3">
+    <project name="lib_build" basedir="." default="copy">
     <property name="source.dir"     value="."/>
     <property name="lejos.home"     value="/home/root/lejos"/>
     <property name="ev3.host"       value="10.0.1.1"/>
