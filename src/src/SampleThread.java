@@ -19,8 +19,8 @@ public class SampleThread extends Thread {
         this.sampleArray = new float[monitor.getSensorArrayLength()][];
     }
 
+    //TODO minmize the object creation
     public void startSampling(){
-
 
         while(running) {
             for(int i = 0; i < monitor.getSensorArrayLength(); i++) {

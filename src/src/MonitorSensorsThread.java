@@ -1,13 +1,18 @@
 package src;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lejos.hardware.Device;
 import lejos.hardware.port.*;
 import lejos.hardware.sensor.EV3SensorConstants;
 import lejos.hardware.sensor.I2CSensor;
+import lejos.hardware.sensor.SensorModes;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MonitorSensorsThread extends Thread{
 	
@@ -17,9 +22,13 @@ public class MonitorSensorsThread extends Thread{
     private Port[] port = {SensorPort.S1, SensorPort.S2, SensorPort.S3, SensorPort.S4};
     private int [] current = new int[port.length];
     private boolean running = true;
+    private Communication communication;
+    Gson gson = new GsonBuilder().create();
 
+    public MonitorSensorsThread(Communication communication){
 
-    public MonitorSensorsThread(){
+        this.communication = communication;
+
         /*
     	 * Note: For now only support the sensors we possess, left as future work to extend this.
     	 * The hash table uses the default mode names for the different sensors,
@@ -48,6 +57,7 @@ public class MonitorSensorsThread extends Thread{
         return sensorArray.length;
     }
 
+
     // Monitor the sensor ports
     public void monitorSensorPorts(){
         int typ;
@@ -57,6 +67,7 @@ public class MonitorSensorsThread extends Thread{
         AnalogPort analogPort;
         String className;
         String modeName;
+        Object sensor;
 
         while(running) {
             for(int i = 0; i < port.length; i++) {
@@ -87,7 +98,9 @@ public class MonitorSensorsThread extends Thread{
                         className = sensorClasses.get(modeName);
                         System.out.println("Sensor class for " + modeName + " is " + className);
 
-                        setSensorArray(i, callGetMethods(className, UARTPort.class, uartPort));
+                        sensor = callGetMethods(className, UARTPort.class, uartPort);
+                        onChange(className, i, sensor);
+                        setSensorArray(i, sensor);
                         livePortArray[i] = uartPort;
                     } 
                     
@@ -163,10 +176,45 @@ public class MonitorSensorsThread extends Thread{
 		return null;
     }
 
+    public void onChange(String sensorClassName, int portNumber,  Object sensorObject){
+        System.out.println(sensorClassName);
+        System.out.println(portNumber);
+        System.out.println(sensorObject);
+        SensorModes sensorModes = (SensorModes) sensorObject;
+
+        Map obj=new LinkedHashMap();
+        obj.put("Settings", "newSensor");
+
+        Map info=new LinkedHashMap();
+        info.put("sensorClass", sensorClassName);
+        info.put("port", portNumber);
+        info.put("availableModes", sensorModes.getAvailableModes());
+        obj.put("info", info);
+
+        System.out.println(gson.toJson(obj));
+
+    }
+
     @Override
     public void run() {
         monitorSensorPorts();
+
+
+
+        // get a port instance
+//        Port port = LocalEV3.get().getPort("S1");
+////
+//
+//        EV3GyroSensor gyro = new EV3GyroSensor(port);
+//        SensorModes modes = (SensorModes)gyro;
+//        System.out.println(modes.getAvailableModes());
+        //HiTechnicAccelerometer a = new HiTechnicAccelerometer(port);
+//    	I2CPort ii = SensorPort.S4.open(I2CPort.class);
+//    	I2CSensor s = new I2CSensor(ii); // NOTE CAN't use this ii, must use the standart port to get the right one, initilize it and such
+//    	System.out.println(s.getProductID());
+
     }
+
 
     public void exit(){
         this.running = false;
