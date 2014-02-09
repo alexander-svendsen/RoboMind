@@ -1,33 +1,32 @@
 package src;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lejos.hardware.Device;
 import lejos.hardware.port.*;
 import lejos.hardware.sensor.EV3SensorConstants;
 import lejos.hardware.sensor.I2CSensor;
-import lejos.hardware.sensor.SensorModes;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-public class MonitorSensorsThread extends Thread{
-	
+public class MonitorSensorsThread extends Thread {
+
     private HashMap<String,String> sensorClasses = new HashMap<String,String>();
     private Object[] sensorArray = new Object[4]; //Not really a fan of hard-coded values, but EV3 always has 4 sensors ports anyway
     private IOPort[] livePortArray = new IOPort[4]; //keeps track of the open ports, mainly used to close the connection when they changes
     private Port[] port = {SensorPort.S1, SensorPort.S2, SensorPort.S3, SensorPort.S4};
     private int [] current = new int[port.length];
     private boolean running = true;
-    private Communication communication;
-    Gson gson = new GsonBuilder().create();
+    private final Object lock = new Object();
 
-    public MonitorSensorsThread(Communication communication){
+    private int sensorCounter = 0;
+    public final Object noSensorLock = new Object();
 
-        this.communication = communication;
+
+    private SensorEventListener sensorEventListener;
+
+    public MonitorSensorsThread(){
+
 
         /*
     	 * Note: For now only support the sensors we possess, left as future work to extend this.
@@ -45,18 +44,32 @@ public class MonitorSensorsThread extends Thread{
         sensorClasses.put("HiTechncCompass ","lejos.hardware.sensor.HiTechnicCompass");
     }
 
-    public synchronized Object getSensorArray(int entry){
+    public Object getSensorArray(int entry){
         return sensorArray[entry];
     }
 
-    public synchronized void setSensorArray(int entry, Object object){
+    private void setSensorArray(int entry, Object object){
         sensorArray[entry] = object;
     }
+
+    public void removeSensorAtEntry(int entry){
+        sensorCounter --;
+        setSensorArray(entry, null);
+    }
+
+    public void addSensorAtEntry(int entry, Object object){
+        sensorCounter ++;
+        setSensorArray(entry, object);
+        synchronized (noSensorLock){
+            noSensorLock.notifyAll();
+        }
+    }
+
+    public int getNumberOfConnectedSensors(){ return sensorCounter; }
 
     public int getSensorArrayLength(){
         return sensorArray.length;
     }
-
 
     // Monitor the sensor ports
     public void monitorSensorPorts(){
@@ -69,7 +82,7 @@ public class MonitorSensorsThread extends Thread{
         String modeName;
         Object sensor;
 
-        while(running) {
+        while(running) { //Note may slow it down here, shouldn't change that often really
             for(int i = 0; i < port.length; i++) {
                 typ =  port[i].getPortType();
                 if (current[i] != typ) {
@@ -79,7 +92,7 @@ public class MonitorSensorsThread extends Thread{
                     if (sensorArray[i] != null){
                         livePortArray[i].close();
                         ((Device) getSensorArray(i)).close();
-                        setSensorArray(i, null);
+                        removeSensorAtEntry(i);
                         System.out.println("Removed old entry at port: " + (i + 1));
                     }
                     
@@ -89,6 +102,7 @@ public class MonitorSensorsThread extends Thread{
                      */
                     if (typ == EV3SensorConstants.CONN_INPUT_UART) {
                     	uartPort = port[i].open(UARTPort.class);
+
                         uartPort.initialiseSensor(0); // Don't get any info from the sensor if we don't initialize it first
                     
                         //Need to trim the modeName, since it sometimes adds trailing whitespace. Seems like a bug.
@@ -99,8 +113,9 @@ public class MonitorSensorsThread extends Thread{
                         System.out.println("Sensor class for " + modeName + " is " + className);
 
                         sensor = callGetMethods(className, UARTPort.class, uartPort);
-                        onChange(className, i, sensor);
-                        setSensorArray(i, sensor);
+
+                        sensorEventListener.newSensor(sensor, className, i);
+                        addSensorAtEntry(i, sensor);
                         livePortArray[i] = uartPort;
                     } 
                     
@@ -124,9 +139,21 @@ public class MonitorSensorsThread extends Thread{
                         className = sensorClasses.get(vendor + product);
                         System.out.println("Sensor class for " + vendor + product + " is " + className);
 
-                        setSensorArray(i, callGetMethods(className, Port.class, port[i]));
+                        sensor = callGetMethods(className, Port.class, port[i]);
+
+                        sensorEventListener.newSensor(sensor, className, i);
+                        addSensorAtEntry(i, sensor);
                         livePortArray[i] = i2CSensor.getPort();
-                    } 
+                    }
+
+                    else if (typ == EV3SensorConstants.CONN_NONE){
+                        sensorEventListener.newInfo("noSensor", i);
+
+                    }
+
+                    else if (typ == EV3SensorConstants.CONN_ERROR){
+                        sensorEventListener.newInfo("connectionError", i);
+                    }
 
                     /**
                      * The remaining sensors which is not an error gets here, basically the analog sensors. 
@@ -134,20 +161,30 @@ public class MonitorSensorsThread extends Thread{
                      * to the color sensor, where the users themselves need to re-map these sensors as there is no possibility of dynamically
                      * discovering it in the code.
                      */
-                    else if (typ != EV3SensorConstants.CONN_NONE  && typ != EV3SensorConstants.CONN_ERROR) {       	
+                    else{
                     	key = Integer.toString(typ);
                     	analogPort = port[i].open(AnalogPort.class);
                 		
                     	className = sensorClasses.get(key);
                 		System.out.println("Sensor class is " + className);
 
-                        setSensorArray(i, callGetMethods(className, AnalogPort.class, analogPort));
+                        sensor = callGetMethods(className, AnalogPort.class, analogPort);
+
+                        sensorEventListener.newSensor(sensor, className, i);
+                        addSensorAtEntry(i, sensor);
                         livePortArray[i] = analogPort;
                     } 
                 }
             }
+            synchronized (lock){
+            try {
+                sleep(5000); // No need to constantly find new sensors, when most users tend to add them before beginning
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        
+
     }
     // Construct an instance of the class with a single parameter, and call its parameterless get and is methods
     private Object callGetMethods(String className, Class<?> paramClass, Object param) {
@@ -176,23 +213,8 @@ public class MonitorSensorsThread extends Thread{
 		return null;
     }
 
-    public void onChange(String sensorClassName, int portNumber,  Object sensorObject){
-        System.out.println(sensorClassName);
-        System.out.println(portNumber);
-        System.out.println(sensorObject);
-        SensorModes sensorModes = (SensorModes) sensorObject;
-
-        Map obj=new LinkedHashMap();
-        obj.put("Settings", "newSensor");
-
-        Map info=new LinkedHashMap();
-        info.put("sensorClass", sensorClassName);
-        info.put("port", portNumber);
-        info.put("availableModes", sensorModes.getAvailableModes());
-        obj.put("info", info);
-
-        System.out.println(gson.toJson(obj));
-
+    public void setListener(SensorEventListener lst) {
+        this.sensorEventListener = lst;
     }
 
     @Override

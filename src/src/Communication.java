@@ -50,7 +50,7 @@ public class Communication {
     }
 
     public void send(String data){
-        printWriter.write(data);
+        printWriter.write(data + '\n');
         printWriter.flush();
     }
 
