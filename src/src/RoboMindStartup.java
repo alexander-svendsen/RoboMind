@@ -22,7 +22,7 @@ public class RoboMindStartup {
             HashMap obj = new HashMap<String, String>();
 
             @Override
-            public synchronized void initilize(){
+            public synchronized void initialize(){
                 obj.put("test", "clear_me");
                 gson.toJson(obj);
                 obj.clear();
@@ -55,7 +55,7 @@ public class RoboMindStartup {
             }
 
             @Override
-            public synchronized void fetchedSamples(float[][] sampleArray) {
+            public synchronized void newSamples(float[][] sampleArray) {
                 obj.put("cmd", "fecthedSamples");
                 obj.put("samples", sampleArray);
 
@@ -69,15 +69,15 @@ public class RoboMindStartup {
 
         communication = new Communication();
         MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-        monitorSensorsThread.setListener(sensorEventListener);
+        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
         SampleThread sampleThread = new SampleThread(monitorSensorsThread);
         sampleThread.setListener(sensorEventListener);
-//
+
         communication.setUpConnection();
         monitorSensorsThread.start();
         sampleThread.start();
-        sensorEventListener.initilize();  // force the objects into memory, quicker building later
+        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
         while(running);
 

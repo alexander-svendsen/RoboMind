@@ -10,9 +10,6 @@ public class TuneThread extends Thread {
             playTune();
         }
 
-        /**
-         * Play the leJOS startup tune.
-         */
         static void playTune()
         {
             Sound.setVolume(1);

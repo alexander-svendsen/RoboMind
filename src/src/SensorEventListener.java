@@ -1,8 +1,8 @@
 package src;
 
 public interface SensorEventListener {
-    void initilize();
+    void initialize();
     void newSensor(Object sensorObject, String sensorClassName, int portNumber);
     void newInfo(String cmd, int portNumber);
-    void fetchedSamples(float[][] sampleArray);
+    void newSamples(float[][] sampleArray);
 }
