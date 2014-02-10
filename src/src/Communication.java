@@ -21,14 +21,11 @@ public class Communication {
     public Communication(){
         try{
             serverSocket = new ServerSocket(9200);
-            System.out.println(getIPAddresses());  // may need it later on the lcd
-
         }catch(IOException e){
             e.printStackTrace();
         }
     }
 
-    //TODO: may not need, move upwords
     public void setUpConnection(){
         try{
             client = serverSocket.accept();

@@ -2,6 +2,7 @@ package src;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 
 import java.util.HashMap;
@@ -28,7 +29,6 @@ public class RoboMindStartup {
                 obj.clear();
             }
 
-            //TODO prolbems with sending whole shit, may because of the unsynch problems shit
             public void sendData(){
                 //System.out.println(gson.toJson(obj));
                 communication.send(gson.toJson(obj));
@@ -65,20 +65,28 @@ public class RoboMindStartup {
 
 
         //new TuneThread().start(); //Tune to know that the program has started
-
+        Button.LEDPattern(9);
 
         communication = new Communication();
-        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-        monitorSensorsThread.setSensorEventListener(sensorEventListener);
+//        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
+//        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
-        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
-        sampleThread.setListener(sensorEventListener);
+//        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
+//        sampleThread.setListener(sensorEventListener);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                Button.LEDPattern(0);
+            }
+        });
+        LCDControl.showIp(Communication.getIPAddresses());
 
         communication.setUpConnection();
-        monitorSensorsThread.start();
-        sampleThread.start();
-        sensorEventListener.initialize();  // force the objects into memory, quicker building later
+        Button.LEDPattern(1);
 
+//        monitorSensorsThread.start();
+//        sampleThread.start();
+        sensorEventListener.initialize();  // force the objects into memory, quicker building later
         while(running);
 
     }
