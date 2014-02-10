@@ -67,7 +67,7 @@ public class RoboMindStartup {
         //new TuneThread().start(); //Tune to know that the program has started
         Button.LEDPattern(9);
 
-        communication = new Communication();
+//        communication = new Communication();
 //        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
 //        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
@@ -79,15 +79,18 @@ public class RoboMindStartup {
                 Button.LEDPattern(0);
             }
         });
-        LCDControl.showIp(Communication.getIPAddresses());
+//        LCDControl.showIp(Communication.getIPAddresses());
 
-        communication.setUpConnection();
+//        communication.setUpConnection();
         Button.LEDPattern(1);
 
 //        monitorSensorsThread.start();
 //        sampleThread.start();
-        sensorEventListener.initialize();  // force the objects into memory, quicker building later
-        while(running);
+//        sensorEventListener.initialize();  // force the objects into memory, quicker building later
+
+        new MotorControl();
+
+//        while(running);
 
     }
 }
