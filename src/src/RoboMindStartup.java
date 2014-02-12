@@ -6,6 +6,7 @@ import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The starting point of the program
@@ -67,30 +68,39 @@ public class RoboMindStartup {
         //new TuneThread().start(); //Tune to know that the program has started
         Button.LEDPattern(9);
 
-//        communication = new Communication();
-//        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-//        monitorSensorsThread.setSensorEventListener(sensorEventListener);
+        communication = new Communication();
+        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
+        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
-//        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
-//        sampleThread.setListener(sensorEventListener);
+        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
+        sampleThread.setListener(sensorEventListener);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 Button.LEDPattern(0);
             }
         });
-//        LCDControl.showIp(Communication.getIPAddresses());
+        LCDControl.showIp(Communication.getIPAddresses());
 
-//        communication.setUpConnection();
+        communication.setUpConnection();
         Button.LEDPattern(1);
-
-//        monitorSensorsThread.start();
+        monitorSensorsThread.start();
 //        sampleThread.start();
-//        sensorEventListener.initialize();  // force the objects into memory, quicker building later
+        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
-        new MotorControl();
+//        new MotorControl();
+        //TODO do while?
+        String command;
+        Map<String, String> data = new HashMap<String, String>();
+        while(running){
+            command = communication.recive();
+            System.out.println(command);
+            data = (Map<String,String>) gson.fromJson(command, data.getClass());
+        }
 
-//        while(running);
+    }
 
+    public static void print(String s){
+        System.out.println(s);
     }
 }

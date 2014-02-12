@@ -37,10 +37,9 @@ public class Communication {
         }
     }
 
-    //Reads a single line of string data
     public String recive(){
         try{
-            return bufferedReader.readLine();
+            return bufferedReader.readLine();  //must contain a \n to be a valid line to receive
         }catch (IOException e){
             return "";
         }

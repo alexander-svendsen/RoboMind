@@ -7,12 +7,12 @@ import lejos.utility.Delay;
 public class MotorControl {
     public NXTRegulatedMotor nxtRegulatedMotor = Motor.A;
     public MotorControl(){
-        //nxtRegulatedMotor.rotate(360);
-        //nxtRegulatedMotor.setSpeed(720);
+        nxtRegulatedMotor.rotate(360);
+        nxtRegulatedMotor.setSpeed(720);
 
-        //nxtRegulatedMotor.forward();
+        nxtRegulatedMotor.forward();
 
-        Delay.msDelay(5000);
+        Delay.msDelay(10000);
         nxtRegulatedMotor.resetTachoCount();
 
         System.out.println(nxtRegulatedMotor.getPosition());
