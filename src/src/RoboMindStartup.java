@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
+import src.motor.MotorControl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,15 +66,15 @@ public class RoboMindStartup {
         };
 
 
-        //new TuneThread().start(); //Tune to know that the program has started
+//        new TuneThread().start(); //Tune to know that the program has started
         Button.LEDPattern(9);
 
         communication = new Communication();
-        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-        monitorSensorsThread.setSensorEventListener(sensorEventListener);
+//        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
+//        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
-        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
-        sampleThread.setListener(sensorEventListener);
+//        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
+//        sampleThread.setListener(sensorEventListener);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -84,18 +85,31 @@ public class RoboMindStartup {
 
         communication.setUpConnection();
         Button.LEDPattern(1);
-        monitorSensorsThread.start();
+//        monitorSensorsThread.start();
 //        sampleThread.start();
-        sensorEventListener.initialize();  // force the objects into memory, quicker building later
+//        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
-//        new MotorControl();
+        MotorControl mc = new MotorControl();
         //TODO do while?
         String command;
         Map<String, String> data = new HashMap<String, String>();
         while(running){
             command = communication.recive();
             System.out.println(command);
+            if (command == null)
+                continue;
             data = (Map<String,String>) gson.fromJson(command, data.getClass());
+            if (data.get("class").equals("motor")){
+                if (data.get("cmd").equals("forward")){
+                    mc.forward(data.get("port"));
+
+                }
+                else if (data.get("cmd").equals("stop")){
+                    mc.stop(data.get("port"));
+                }
+            }
+
+
         }
 
     }
