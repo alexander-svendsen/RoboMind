@@ -37,12 +37,8 @@ public class Communication {
         }
     }
 
-    public String recive(){
-        try{
-            return bufferedReader.readLine();  //must contain a \n to be a valid line to receive
-        }catch (IOException e){
-            return "";
-        }
+    public String recive() throws IOException{
+        return bufferedReader.readLine();  //must contain a \n to be a valid line to receive
     }
 
     public void send(String data){

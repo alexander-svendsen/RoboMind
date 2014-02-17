@@ -5,9 +5,11 @@ import com.google.gson.GsonBuilder;
 import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 import src.motor.MotorControl;
+import src.util.Request;
+import src.util.Response;
 
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The starting point of the program
@@ -18,8 +20,8 @@ public class RoboMindStartup {
     static boolean running = true;
     static Communication communication;
 
-    public static void main(String[] args) {
-        System.out.println("Robomind started");
+    public static void main(String[] args) throws IOException {
+        System.out.println("RoboMind started");
 
         SensorEventListener sensorEventListener = new SensorEventListener() {
             HashMap obj = new HashMap<String, String>();
@@ -92,25 +94,92 @@ public class RoboMindStartup {
         MotorControl mc = new MotorControl();
         //TODO do while?
         String command;
-        Map<String, String> data = new HashMap<String, String>();
+        Request data;
+        Response response = new Response();
         while(running){
-            command = communication.recive();
-            System.out.println(command);
-            if (command == null)
+            try {
+                command = communication.recive();
+                if (command == null){
+                    throw new IOException();
+                }
+            } catch (IOException e) {
+                Button.LEDPattern(9);
+                communication.setUpConnection();
+                Button.LEDPattern(1);
                 continue;
-            data = (Map<String,String>) gson.fromJson(command, data.getClass());
-            if (data.get("class").equals("motor")){
-                if (data.get("cmd").equals("forward")){
-                    mc.forward(data.get("port"));
+            }
+
+            System.out.println(command);
+            data = gson.fromJson(command, Request.class);
+            if (data.cla.equals("motor")){
+                if (data.cmd.equals("forward")){
+                    mc.forward(data.port);
+                }
+                else if (data.cmd.equals("backward")){
+                    mc.backward(data.port);
+                }
+                else if (data.cmd.equals("stop")){
+                    mc.stop(data.port);
+                }
+                else if (data.cmd.equals("rotate")){
+                    mc.rotate(data.port, data.degrees, data.immediate);
+                }
+                else if (data.cmd.equals("rotate_to")){
+                    mc.rotateTo(data.port, data.degrees, data.immediate);
+                }
+                else if (data.cmd.equals("set_speed")){
+                    mc.setSpeed(data.port, data.speed);
+                }
+                else if (data.cmd.equals("set_acceleration")){
+                    mc.setAcceleration(data.port, data.acceleration);
+                }
+                else if (data.cmd.equals("set_stalled_threshold")){
+                    mc.setStallhreshold(data.port, data.error, data.time);
+                }
+                else if (data.cmd.equals("reset_tacho_count")){
+                    mc.resetTachoCount(data.port);
+                }
+                else if (data.cmd.equals("set_float_mode")){
+                    mc.setFloatMode(data.port);
+                }
+                else if (data.cmd.equals("get_tacho_count")){
+                    response.data = mc.getTachoCount(data.port);
+                }
+                else if (data.cmd.equals("get_position")){
+                    response.data = mc.getPosition(data.port);
 
                 }
-                else if (data.get("cmd").equals("stop")){
-                    mc.stop(data.get("port"));
+                else if (data.cmd.equals("is_moving")){
+                    response.data = mc.isMoving(data.port) ? 1 : 0;
+
                 }
+                else if (data.cmd.equals("is_stalled")){
+                    response.data = mc.isStalled(data.port) ? 1 : 0;
+
+                }
+                else if (data.cmd.equals("get_max_speed")){
+                    response.data = mc.getMaxSpeed(data.port);
+
+                }
+                else{
+                    throw new IOException("Invalid command");
+                }
+
+
             }
+            else{
+                throw new IOException("Invalid class");
+            }
+            communication.send(gson.toJson(response));
+
+
 
 
         }
+
+    }
+
+    public static void run(){
 
     }
 
