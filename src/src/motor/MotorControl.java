@@ -1,6 +1,6 @@
 package src.motor;
 
-import lejos.hardware.motor.Motor;
+import lejos.hardware.BrickFinder;
 import lejos.hardware.motor.NXTRegulatedMotor;
 
 import java.util.HashMap;
@@ -11,10 +11,15 @@ public class MotorControl {
     private Map<String, NXTRegulatedMotor> motors = new HashMap<String, NXTRegulatedMotor>();
 
     public MotorControl(){
-        motors.put("A", Motor.A);
-        motors.put("B", Motor.B);
-        motors.put("C", Motor.C);
-        motors.put("D", Motor.D);
+        openPorts();
+    }
+
+    public void openPorts(){
+        //Review not really memory efficent
+        motors.put("A", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("A")));
+        motors.put("B", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("B")));
+        motors.put("C", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("C")));
+        motors.put("D", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("D")));
     }
 
     public void forward(String motorPort){
@@ -25,8 +30,8 @@ public class MotorControl {
         motors.get(motorPort).backward();
     }
 
-    public void stop(String motorPort) {
-        motors.get(motorPort).stop(true);
+    public void stop(String motorPort, boolean immediateReturn) {
+        motors.get(motorPort).stop(immediateReturn);
     }
 
     public void rotate(String motorPort, int degrees, boolean immediateReturn){
@@ -79,6 +84,13 @@ public class MotorControl {
 
     public float getMaxSpeed(String motorPort){
         return motors.get(motorPort).getMaxSpeed();
+    }
+
+    public void reset(){
+        motors.get("A").close();
+        motors.get("B").close();
+        motors.get("C").close();
+        motors.get("D").close();
     }
 
 }

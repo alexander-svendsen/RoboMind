@@ -85,13 +85,13 @@ public class RoboMindStartup {
         });
         LCDControl.showIp(Communication.getIPAddresses());
 
+        MotorControl mc = new MotorControl();
         communication.setUpConnection();
         Button.LEDPattern(1);
 //        monitorSensorsThread.start();
 //        sampleThread.start();
 //        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
-        MotorControl mc = new MotorControl();
         //TODO do while?
         String command;
         Request data;
@@ -104,6 +104,7 @@ public class RoboMindStartup {
                 }
             } catch (IOException e) {
                 Button.LEDPattern(9);
+                mc.reset();
                 communication.setUpConnection();
                 Button.LEDPattern(1);
                 continue;
@@ -119,7 +120,7 @@ public class RoboMindStartup {
                     mc.backward(data.port);
                 }
                 else if (data.cmd.equals("stop")){
-                    mc.stop(data.port);
+                    mc.stop(data.port, data.immediate);
                 }
                 else if (data.cmd.equals("rotate")){
                     mc.rotate(data.port, data.degrees, data.immediate);
