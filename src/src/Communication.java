@@ -1,10 +1,8 @@
 package src;
 
 import java.io.*;
-import java.net.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * Note:
@@ -37,7 +35,7 @@ public class Communication {
         }
     }
 
-    public String recive() throws IOException{
+    public String receive() throws IOException{
         return bufferedReader.readLine();  //must contain a \n to be a valid line to receive
     }
 
@@ -52,38 +50,5 @@ public class Communication {
         }catch (IOException e){
             e.printStackTrace(); //ignore
         }
-    }
-
-    //The same code used in the menu of Lejos to find the different ip-addresses
-    public static List<String> getIPAddresses()
-    {
-        List<String> result = new ArrayList<String>();
-        Enumeration<NetworkInterface> interfaces;
-        try
-        {
-            interfaces = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e)
-        {
-            System.err.println("Failed to get network interfaces: " + e);
-            return null;
-        }
-        while (interfaces.hasMoreElements()){
-            NetworkInterface current = interfaces.nextElement();
-            try
-            {
-                if (!current.isUp() || current.isLoopback() || current.isVirtual()) continue;
-            } catch (SocketException e)
-            {
-                System.err.println("Failed to get network properties: " + e);
-            }
-            Enumeration<InetAddress> addresses = current.getInetAddresses();
-            while (addresses.hasMoreElements()){
-                InetAddress current_addr = addresses.nextElement();
-                if (current_addr.isLoopbackAddress() || current_addr.isLinkLocalAddress())
-                    continue;
-                result.add(current_addr.getHostAddress());
-            }
-        }
-        return result;
     }
 }

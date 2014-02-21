@@ -8,9 +8,13 @@
     <property name="main-class"     value="src.RoboMindStartup"/>
     <property name="lejos.home"     value="/home/root/lejos"/>
     <property name="ev3.host"       value="10.0.1.1"/>
+    <property name="libdbus.dir"    value="../../git/ev3/DBusJava/"/>
 
-    <path id="libraries.path">    
+    <path id="libraries.path">
         <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${libdbus.dir}">
             <include name="*.jar"/>
         </fileset>
     </path>
@@ -40,6 +44,7 @@
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
                 <attribute name="Class-Path" value="${lejos.home}/lib/ev3classes.jar
+                                                    ${lejos.home}/lib/dbusjava.jar
                                                     ${lejos.home}/lib/gson/gson.jar
                                                     ${lejos.home}/libjna/usr/share/java/jna.jar"
 
@@ -53,4 +58,17 @@
             <fileset file="${jar.dir}/${ant.project.name}.jar"/>
         </scp>
     </target>
+
+
+
+    <!--ssh connects and run the program-->
+    <!--<target name="connectrun" depends="copy">-->
+        <!--<sshexec host="${ev3.host}"-->
+                 <!--username="root"-->
+                 <!--password=""-->
+                 <!--trust="true"-->
+                 <!--verbose="false"-->
+                 <!--command="jrun -jar /home/lejos/programs/RoboMind.jar">-->
+        <!--</sshexec>-->
+    <!--</target>-->
 </project>

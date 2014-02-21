@@ -22,6 +22,7 @@ public class RoboMindStartup {
 
     public static void main(String[] args) throws IOException {
         System.out.println("RoboMind started");
+        new Bluetooth();
 
         SensorEventListener sensorEventListener = new SensorEventListener() {
             HashMap obj = new HashMap<String, String>();
@@ -83,8 +84,6 @@ public class RoboMindStartup {
                 Button.LEDPattern(0);
             }
         });
-        LCDControl.showIp(Communication.getIPAddresses());
-
         MotorControl mc = new MotorControl();
         communication.setUpConnection();
         Button.LEDPattern(1);
@@ -98,7 +97,7 @@ public class RoboMindStartup {
         Response response = new Response();
         while(running){
             try {
-                command = communication.recive();
+                command = communication.receive();
                 if (command == null){
                     throw new IOException();
                 }

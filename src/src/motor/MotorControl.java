@@ -91,6 +91,7 @@ public class MotorControl {
         motors.get("B").close();
         motors.get("C").close();
         motors.get("D").close();
+        this.openPorts();
     }
 
 }
