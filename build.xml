@@ -7,14 +7,15 @@
     <property name="jar.dir"        value="dist"/>
     <property name="main-class"     value="src.RoboMindStartup"/>
     <property name="lejos.home"     value="/home/root/lejos"/>
+    <property name="jna.dir"        value="../../git/ev3/ev3classes/lib"/>
     <property name="ev3.host"       value="10.0.1.1"/>
     <property name="libdbus.dir"    value="../../git/ev3/DBusJava/"/>
 
     <path id="libraries.path">
-        <fileset dir="${lib.dir}">
+        <fileset dir="${libdbus.dir}">
             <include name="*.jar"/>
         </fileset>
-        <fileset dir="${libdbus.dir}">
+        <fileset dir="${lib.dir}">
             <include name="*.jar"/>
         </fileset>
     </path>
@@ -47,7 +48,6 @@
                                                     ${lejos.home}/lib/dbusjava.jar
                                                     ${lejos.home}/lib/gson/gson.jar
                                                     ${lejos.home}/libjna/usr/share/java/jna.jar"
-
                 />
             </manifest>
         </jar>  

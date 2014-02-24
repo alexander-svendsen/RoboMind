@@ -22,7 +22,6 @@ public class RoboMindStartup {
 
     public static void main(String[] args) throws IOException {
         System.out.println("RoboMind started");
-        new Bluetooth();
 
         SensorEventListener sensorEventListener = new SensorEventListener() {
             HashMap obj = new HashMap<String, String>();
@@ -70,7 +69,6 @@ public class RoboMindStartup {
 
 
 //        new TuneThread().start(); //Tune to know that the program has started
-        Button.LEDPattern(9);
 
         communication = new Communication();
 //        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
@@ -85,6 +83,8 @@ public class RoboMindStartup {
             }
         });
         MotorControl mc = new MotorControl();
+
+        Button.LEDPattern(9);
         communication.setUpConnection();
         Button.LEDPattern(1);
 //        monitorSensorsThread.start();
@@ -101,7 +101,7 @@ public class RoboMindStartup {
                 if (command == null){
                     throw new IOException();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Button.LEDPattern(9);
                 mc.reset();
                 communication.setUpConnection();
@@ -170,6 +170,7 @@ public class RoboMindStartup {
             else{
                 throw new IOException("Invalid class");
             }
+            System.out.println("lets contintue");
             communication.send(gson.toJson(response));
 
 

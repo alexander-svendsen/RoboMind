@@ -2,10 +2,11 @@ package src.lib;
 
 import lejos.utility.Delay;
 
-class BroadcastThread extends Thread {
+public class BroadcastThread extends Thread {
 
     String hostname;
 
+    //Fixme what is the hostname?
     public BroadcastThread(String hostname){
         this.hostname = hostname;
     }
