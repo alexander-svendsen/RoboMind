@@ -45,9 +45,12 @@ public class MonitorSensorsThread extends Thread {
         sensorClasses.put("COL-REFLECT","lejos.hardware.sensor.EV3ColorSensor");
         sensorClasses.put("GYRO-ANG", "lejos.hardware.sensor.EV3GyroSensor");
         sensorClasses.put("US-DIST-CM", "lejos.hardware.sensor.EV3UltrasonicSensor");
+        sensorClasses.put("LEGOSonar", "lejos.hardware.sensor.NXTUltrasonicSensor");
         sensorClasses.put("HiTechncColor   ","lejos.hardware.sensor.HiTechnicColorSensor");
         sensorClasses.put("HITECHNCAccel.  ","lejos.hardware.sensor.HiTechnicAccelerometer");
         sensorClasses.put("HiTechncCompass ","lejos.hardware.sensor.HiTechnicCompass");
+        sensorClasses.put("HiTechncIR Dir. ","lejos.hardware.sensor.HiTechnicIRSeeker");
+
     }
 
     public Object getSensorArray(int entry){

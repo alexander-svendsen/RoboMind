@@ -70,6 +70,8 @@ public class RoboMindStartup {
 
 //        new TuneThread().start(); //Tune to know that the program has started
 
+//        SensorTests s = new SensorTests();
+        SensorControl s = new SensorControl();
         communication = new Communication();
 //        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
 //        monitorSensorsThread.setSensorEventListener(sensorEventListener);
