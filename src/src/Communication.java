@@ -62,26 +62,30 @@ public class Communication {
                     bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
                     printWriter = new PrintWriter(client.getOutputStream());
                     connectionEstablished = true;
+                    lock.notifyAll();
                 }
 
             }catch(IOException e){
                 e.printStackTrace(); //ignore
             }
+
         }
     }
 
     class BTThread extends  Thread{
         @Override
         public void run() {
+            bc = btConnector.waitForConnection();
             synchronized (lock){
                 if (connectionEstablished){
                     return;
                 }
-                bc = btConnector.waitForConnection();
                 bufferedReader = new BufferedReader(new InputStreamReader(bc.openInputStream()));
                 printWriter = new PrintWriter(bc.openOutputStream());
                 connectionEstablished = true;
+                lock.notifyAll();
             }
+
         }
     }
 

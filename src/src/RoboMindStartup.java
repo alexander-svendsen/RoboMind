@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 import src.motor.MotorControl;
+import src.sensor.SensorControl;
 import src.util.Request;
 import src.util.Response;
 
@@ -71,7 +72,7 @@ public class RoboMindStartup {
 //        new TuneThread().start(); //Tune to know that the program has started
 
 //        SensorTests s = new SensorTests();
-        SensorControl s = new SensorControl();
+        SensorControl sensorControl = new SensorControl();
         communication = new Communication();
 //        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
 //        monitorSensorsThread.setSensorEventListener(sensorEventListener);
@@ -106,6 +107,7 @@ public class RoboMindStartup {
             } catch (Exception e) {
                 Button.LEDPattern(9);
                 mc.reset();
+                sensorControl.reset();
                 communication.setUpConnection();
                 Button.LEDPattern(1);
                 continue;
@@ -115,64 +117,67 @@ public class RoboMindStartup {
             data = gson.fromJson(command, Request.class);
             if (data.cla.equals("motor")){
                 if (data.cmd.equals("forward")){
-                    mc.forward(data.port);
+                    mc.forward(data.motor_port);
                 }
                 else if (data.cmd.equals("backward")){
-                    mc.backward(data.port);
+                    mc.backward(data.motor_port);
                 }
                 else if (data.cmd.equals("stop")){
-                    mc.stop(data.port, data.immediate);
+                    mc.stop(data.motor_port, data.immediate);
                 }
                 else if (data.cmd.equals("rotate")){
-                    mc.rotate(data.port, data.degrees, data.immediate);
+                    mc.rotate(data.motor_port, data.degrees, data.immediate);
                 }
                 else if (data.cmd.equals("rotate_to")){
-                    mc.rotateTo(data.port, data.degrees, data.immediate);
+                    mc.rotateTo(data.motor_port, data.degrees, data.immediate);
                 }
                 else if (data.cmd.equals("set_speed")){
-                    mc.setSpeed(data.port, data.speed);
+                    mc.setSpeed(data.motor_port, data.speed);
                 }
                 else if (data.cmd.equals("set_acceleration")){
-                    mc.setAcceleration(data.port, data.acceleration);
+                    mc.setAcceleration(data.motor_port, data.acceleration);
                 }
                 else if (data.cmd.equals("set_stalled_threshold")){
-                    mc.setStallhreshold(data.port, data.error, data.time);
+                    mc.setStallhreshold(data.motor_port, data.error, data.time);
                 }
                 else if (data.cmd.equals("reset_tacho_count")){
-                    mc.resetTachoCount(data.port);
+                    mc.resetTachoCount(data.motor_port);
                 }
                 else if (data.cmd.equals("set_float_mode")){
-                    mc.setFloatMode(data.port);
+                    mc.setFloatMode(data.motor_port);
                 }
                 else if (data.cmd.equals("get_tacho_count")){
-                    response.data = mc.getTachoCount(data.port);
+                    response.data = mc.getTachoCount(data.motor_port);
                 }
                 else if (data.cmd.equals("get_position")){
-                    response.data = mc.getPosition(data.port);
+                    response.data = mc.getPosition(data.motor_port);
 
                 }
                 else if (data.cmd.equals("is_moving")){
-                    response.data = mc.isMoving(data.port) ? 1 : 0;
+                    response.data = mc.isMoving(data.motor_port) ? 1 : 0;
 
                 }
                 else if (data.cmd.equals("is_stalled")){
-                    response.data = mc.isStalled(data.port) ? 1 : 0;
+                    response.data = mc.isStalled(data.motor_port) ? 1 : 0;
 
                 }
                 else if (data.cmd.equals("get_max_speed")){
-                    response.data = mc.getMaxSpeed(data.port);
+                    response.data = mc.getMaxSpeed(data.motor_port);
 
                 }
                 else{
                     throw new IOException("Invalid command");
                 }
-
+            }
+            else if (data.cla.equals("sensor")){
+                if (data.cmd.equals("open_sensor")){
+                    response.data = sensorControl.openSensorByNameOnPort(data.sensor_class_name, data.sensor_port) ? 1 : 0;
+                }
 
             }
             else{
                 throw new IOException("Invalid class");
             }
-            System.out.println("lets contintue");
             communication.send(gson.toJson(response));
 
 
