@@ -95,6 +95,7 @@ public class RoboMindStartup {
 //        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
         //TODO do while?
+        //TODO remove data field if there is no data
         String command;
         Request data;
         Response response = new Response();
@@ -173,6 +174,9 @@ public class RoboMindStartup {
             else if (data.cla.equals("sensor")){
                 if (data.cmd.equals("open_sensor")){
                     response.data = sensorControl.openSensorByNameOnPort(data.sensor_class_name, data.sensor_port) ? 1 : 0;
+                }
+                else if (data.cmd.equals("close")){
+                    sensorControl.close(data.sensor_port);
                 }
 
             }

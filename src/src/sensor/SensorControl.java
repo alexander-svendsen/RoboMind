@@ -2,6 +2,7 @@ package src.sensor;
 
 import lejos.hardware.sensor.BaseSensor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -36,5 +37,13 @@ public class SensorControl {
                 sensor.close();
             }
         }
+        Arrays.fill(sensorArray, null);
     }
+
+    public void close(int port){
+        if (sensorArray[port] != null){
+            sensorArray[port].close();
+        }
+    }
+
 }
