@@ -120,12 +120,35 @@ public class Communication {
         printWriter.flush();
     }
 
+    public void closeStreams() throws IOException {
+        bufferedReader.close();
+        printWriter.close();
+    }
+
     public void close(){
         try{
-            client.close();
-            bc.close();
+            if (client != null){
+                client.close();
+                closeStreams();
+            }
+            if( bc != null){
+                bc.close();
+                closeStreams();
+            }
+
         }catch (IOException e){
             e.printStackTrace(); //ignore
         }
+    }
+
+    public void shutdown(){
+        this.close();
+        try {
+            serverSocket.close();
+            btConnector.cancel();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -108,6 +108,7 @@ public class RoboMindStartup {
                 Button.LEDPattern(9);
                 mc.reset();
                 sensorControl.reset();
+                communication.close();
                 communication.setUpConnection();
                 Button.LEDPattern(1);
                 continue;
