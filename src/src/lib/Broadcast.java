@@ -8,8 +8,9 @@ public class Broadcast {
 
     public static final int port = 9200;
 
+    //TODO: really uneffical usage of sockets..., got a problem with it at a later time
 	public static void broadcast(String message) {
-		DatagramSocket c;
+		DatagramSocket c = null;
 		try {
 		  c = new DatagramSocket();
 		  c.setBroadcast(true);
@@ -49,9 +50,14 @@ public class Broadcast {
 		      //System.out.println("Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
 		    }
 		  }
-
 		} catch (IOException ex) {
-			  System.err.println("Exception opening socket : " + ex);
+			  System.err.println("Exception opening for broadcast socket : " + ex);
+
 		}
-	}
+        finally {
+            if (c != null){
+                c.close();
+            }
+        }
+    }
 }
