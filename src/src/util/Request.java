@@ -16,4 +16,5 @@ public class Request {
     public int sensor_port = 0;
     public String sensor_class_name = "";
     public int mode;
+    public String method = "";
 }

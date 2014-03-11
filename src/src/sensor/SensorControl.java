@@ -65,4 +65,15 @@ public class SensorControl {
         }
     }
 
+    public boolean callMethod(int sensorPort, String methodName) {
+        java.lang.reflect.Method method;
+        try {
+            method = sensorArray[sensorPort].getClass().getMethod(methodName);
+            method.invoke(sensorArray[sensorPort]);
+        } catch (Exception e) {
+            return false;
+        }
+        System.out.println("IT WORKS");
+        return true;
+    }
 }

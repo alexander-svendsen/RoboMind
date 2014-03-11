@@ -186,6 +186,9 @@ public class RoboMindStartup {
                 else if(data.cmd.equals("fetch_sample")){
                     response.sample = sensorControl.fetchSample(data.sensor_port);
                 }
+                else if(data.cmd.equals("call_method")){
+                    response.data = sensorControl.callMethod(data.sensor_port, data.method) ? 1 : 0;
+                }
 
             }
             else{
