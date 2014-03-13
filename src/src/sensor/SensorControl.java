@@ -4,7 +4,6 @@ import lejos.hardware.sensor.BaseSensor;
 import lejos.hardware.sensor.SensorMode;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * Categorize the different sensors and will give the correct sensor if only a analog is discovered
@@ -12,8 +11,6 @@ import java.util.HashMap;
  * Can set the specific type as well, altough an error would be returned if a mistake
  */
 public class SensorControl {
-    private HashMap<String,String> sensorClasses = new HashMap<String,String>();
-
     //Not really a fan of hard-coded values, but EV3 always has 4 sensors ports anyway
     SensorDiscovery sensorDiscovery = new SensorDiscovery();
 
@@ -30,16 +27,18 @@ public class SensorControl {
     }
 
     public boolean openSensorByNameOnPort(String sensorName, int portNumber){
-        sensorArray[portNumber] = (BaseSensor)sensorDiscovery.constructSensorObject(sensorName, portNumber);
-        setSensorModes(portNumber, 0);
-        return sensorArray[portNumber] == null;
+        BaseSensor temp = (BaseSensor)sensorDiscovery.constructSensorObject(sensorName, portNumber);
+        if (temp !=null){
+            sensorArray[portNumber] = temp;
+            setSensorModes(portNumber, 0);
+            return true;
+        }
+        return false;
     }
 
     public void setSensorModes(int port, int mode){
-        if (sensorArray[port] != null){
-            sensorMode[port] = sensorArray[port].getMode(mode);
-            sampleProvider[port] = new float[sensorMode[port].sampleSize()];
-        }
+        sensorMode[port] = sensorArray[port].getMode(mode);
+        sampleProvider[port] = new float[sensorMode[port].sampleSize()];
     }
 
     public float[] fetchSample(int portNumber){
@@ -73,7 +72,6 @@ public class SensorControl {
         } catch (Exception e) {
             return false;
         }
-        System.out.println("IT WORKS");
         return true;
     }
 }
