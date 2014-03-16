@@ -189,25 +189,18 @@ public class RoboMindStartup {
                 else if(data.cmd.equals("call_method")){
                     response.data = sensorControl.callMethod(data.sensor_port, data.method) ? 1 : 0;
                 }
+                else if(data.cmd.equals("get_sensor_type")){
+                    response.msg = sensorControl.getSensorAtPort(data.sensor_port);
+                }
+                else{
+                    throw new IOException("Invalid command");
+                }
 
             }
             else{
                 throw new IOException("Invalid class");
             }
             communication.send(gson.toJson(response));
-
-
-
-
         }
-
-    }
-
-    public static void run(){
-
-    }
-
-    public static void print(String s){
-        System.out.println(s);
     }
 }
