@@ -118,8 +118,9 @@ public class RoboMindStartup {
             System.out.println(command);
             data = gson.fromJson(command, Request.class);
 
-            response.sample = null;
+            response.reset();
             response.seq = data.seq;
+            response.msg = "response";
             if (data.cla.equals("motor")){
                 if (data.cmd.equals("forward")){
                     mc.forward(data.motor_port);
@@ -191,7 +192,7 @@ public class RoboMindStartup {
                     response.data = sensorControl.callMethod(data.sensor_port, data.method) ? 1 : 0;
                 }
                 else if(data.cmd.equals("get_sensor_type")){
-                    response.msg = sensorControl.getSensorAtPort(data.sensor_port);
+                    response.sample_string = sensorControl.getSensorAtPort(data.sensor_port);
                 }
                 else{
                     throw new IOException("Invalid command");

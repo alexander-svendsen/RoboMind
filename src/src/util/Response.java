@@ -6,5 +6,13 @@ public class Response {
     public int seq = 0;
 
     public float[] sample = null;
+    public String sample_string = "";
+
+
+    public void reset(){
+        data = 0;
+        sample = null;
+        sample_string = "";
+    }
 
 }
