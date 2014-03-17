@@ -3,6 +3,7 @@ package src.util;
 public class Request {
     public String cla = "";
     public String cmd = "";
+    public int seq = 0;
 
     public String motor_port = "";
     public int degrees = 0;

@@ -119,6 +119,7 @@ public class RoboMindStartup {
             data = gson.fromJson(command, Request.class);
 
             response.sample = null;
+            response.seq = data.seq;
             if (data.cla.equals("motor")){
                 if (data.cmd.equals("forward")){
                     mc.forward(data.motor_port);
