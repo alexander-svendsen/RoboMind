@@ -2,6 +2,7 @@ package src;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lejos.hardware.Battery;
 import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 import src.motor.MotorControl;
@@ -196,6 +197,12 @@ public class RoboMindStartup {
                 }
                 else{
                     throw new IOException("Invalid command");
+                }
+
+            }
+            else if (data.cla.equals("status")){
+                if (data.cmd.equals("battery")){
+                    response.data = Battery.getVoltageMilliVolt();
                 }
 
             }
