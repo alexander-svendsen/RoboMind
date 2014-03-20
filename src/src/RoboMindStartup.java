@@ -7,6 +7,7 @@ import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 import src.motor.MotorControl;
 import src.sensor.SensorControl;
+import src.util.HostName;
 import src.util.Request;
 import src.util.Response;
 
@@ -201,10 +202,8 @@ public class RoboMindStartup {
 
             }
             else if (data.cla.equals("status")){
-                if (data.cmd.equals("battery")){
-                    response.data = Battery.getVoltageMilliVolt();
-                }
-
+                response.data = Battery.getVoltageMilliVolt();
+                response.sample_string = HostName.getHostName();
             }
             else{
                 throw new IOException("Invalid class");
