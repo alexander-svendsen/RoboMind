@@ -4,15 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lejos.hardware.Battery;
 import lejos.hardware.Button;
-import lejos.hardware.sensor.SensorModes;
 import src.motor.MotorControl;
+import src.sensor.MonitorSensorsThread;
 import src.sensor.SensorControl;
 import src.util.HostName;
 import src.util.Request;
 import src.util.Response;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * The starting point of the program
@@ -27,44 +26,36 @@ public class RoboMindStartup {
         System.out.println("RoboMind started");
 
         SensorEventListener sensorEventListener = new SensorEventListener() {
-            HashMap obj = new HashMap<String, String>();
-
-            @Override
-            public synchronized void initialize(){
-                obj.put("test", "clear_me");
-                gson.toJson(obj);
-                obj.clear();
-            }
+            Response res = new Response();
 
             public void sendData(){
-                //System.out.println(gson.toJson(obj));
-                communication.send(gson.toJson(obj));
-                obj.clear();
+                communication.send(gson.toJson(res));
             }
 
             @Override
             public synchronized void newSensor(Object sensorObject, String sensorClassName, int portNumber) {
-                SensorModes sensorModes = (SensorModes) sensorObject;
-                obj.put("cmd", "newSensor");
-                obj.put("sensorClass", sensorClassName);
-                obj.put("port", portNumber);
-                obj.put("availableModes", sensorModes.getAvailableModes());
+                res.reset();
+                res.msg = "new_sensor";
+                res.sample_string = sensorClassName;
+                res.data = portNumber;
 
                 sendData();
             }
 
             @Override
             public synchronized void newInfo(String cmd, int portNumber) {
-                obj.put("cmd", cmd);
-                obj.put("port", portNumber);
+                res.reset();
+                res.msg = cmd;
+                res.data = portNumber;
 
                 sendData();
             }
 
             @Override
             public synchronized void newSamples(float[][] sampleArray) {
-                obj.put("cmd", "fecthedSamples");
-                obj.put("samples", sampleArray);
+                res.reset();
+                res.msg = "fetch_sample";
+                res.samples =  sampleArray;
 
                 sendData();
             }
@@ -76,8 +67,8 @@ public class RoboMindStartup {
 //        SensorTests s = new SensorTests();
         SensorControl sensorControl = new SensorControl();
         communication = new Communication();
-//        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-//        monitorSensorsThread.setSensorEventListener(sensorEventListener);
+        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
+        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
 //        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
 //        sampleThread.setListener(sensorEventListener);
@@ -92,7 +83,6 @@ public class RoboMindStartup {
         Button.LEDPattern(9);
         communication.setUpConnection();
         Button.LEDPattern(1);
-//        monitorSensorsThread.start();
 //        sampleThread.start();
 //        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
@@ -111,9 +101,11 @@ public class RoboMindStartup {
                 Button.LEDPattern(9);
                 mc.reset();
                 sensorControl.reset();
+                monitorSensorsThread.exit();
+                monitorSensorsThread = new MonitorSensorsThread();
                 communication.close();
                 communication.setUpConnection();
-                Button.LEDPattern(1);
+                Button.LEDPattern(1);  // fixme  maybe move inside communication
                 continue;
             }
 
@@ -199,11 +191,23 @@ public class RoboMindStartup {
                 else{
                     throw new IOException("Invalid command");
                 }
-
             }
             else if (data.cla.equals("status")){
                 response.data = Battery.getVoltageMilliVolt();
                 response.sample_string = HostName.getHostName();
+            }
+            else if (data.cla.equals("subscribe")){
+                if (data.cmd.equals("subscribe_on_sensor_changes")){
+                    monitorSensorsThread.start();
+                }
+                else if(data.cmd.equals("subscribe_on_stream_data")){
+                    //TODO
+                }
+                else if(data.cmd.equals("close")){
+                    monitorSensorsThread.exit();
+
+                }
+                continue; // REVIEW: hmmmm
             }
             else{
                 throw new IOException("Invalid class");

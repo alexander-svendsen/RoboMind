@@ -6,6 +6,7 @@ public class Response {
     public int seq = 0;
 
     public float[] sample = null;
+    public float[][] samples = null;
     public String sample_string = "";
 
 

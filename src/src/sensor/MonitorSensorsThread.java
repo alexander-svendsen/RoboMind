@@ -1,9 +1,10 @@
-package src;
+package src.sensor;
 
 import lejos.hardware.Device;
 import lejos.hardware.port.*;
 import lejos.hardware.sensor.EV3SensorConstants;
 import lejos.hardware.sensor.I2CSensor;
+import src.SensorEventListener;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -31,6 +32,7 @@ public class MonitorSensorsThread extends Thread {
     private boolean running;
 
     private SensorEventListener sensorEventListener;
+
     public void setSensorEventListener(SensorEventListener lst) {
         this.sensorEventListener = lst;
     }
@@ -152,11 +154,11 @@ public class MonitorSensorsThread extends Thread {
                             break;
 
                         case(EV3SensorConstants.CONN_NONE):
-                            sensorEventListener.newInfo("noSensor", i);
+                            sensorEventListener.newInfo("no_sensor", i);
                             break;
 
                         case(EV3SensorConstants.CONN_ERROR):
-                            sensorEventListener.newInfo("connectionError", i);
+                            sensorEventListener.newInfo("connection_error", i);
                             break;
 
                         /*
@@ -228,6 +230,7 @@ public class MonitorSensorsThread extends Thread {
     public void run() {
         this.running = true;
         monitorSensorPorts();
+        System.out.println("IT FINALLY CLOSED");
     }
 
     public void exit(){

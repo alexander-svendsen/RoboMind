@@ -115,7 +115,7 @@ public class Communication {
         return bufferedReader.readLine();  //must contain a \n to be a valid line to receive
     }
 
-    public void send(String data){
+    public synchronized void send(String data){
         printWriter.write(data + '\n');
         printWriter.flush();
     }

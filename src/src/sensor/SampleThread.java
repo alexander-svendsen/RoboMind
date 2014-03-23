@@ -1,8 +1,9 @@
-package src;
+package src.sensor;
 
 import lejos.hardware.DeviceException;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
+import src.SensorEventListener;
 
 public class SampleThread extends Thread {
 
