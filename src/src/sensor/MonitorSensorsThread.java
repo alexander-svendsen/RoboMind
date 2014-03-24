@@ -124,7 +124,7 @@ public class MonitorSensorsThread extends Thread {
                             className = sensorClasses.get(modeName);
                             sensor = constructSensorObject(className, UARTPort.class, uartPort);
 
-                            sensorEventListener.newSensor(sensor, className, i);
+                            sensorEventListener.newSensor(className, i);
                             addSensorAtEntry(i, sensor);
                             connectedPortsArray[i] = uartPort;
                             break;
@@ -148,7 +148,7 @@ public class MonitorSensorsThread extends Thread {
 
                             sensor = constructSensorObject(className, Port.class, port[i]);
 
-                            sensorEventListener.newSensor(sensor, className, i);
+                            sensorEventListener.newSensor(className, i);
                             addSensorAtEntry(i, sensor);
                             connectedPortsArray[i] = i2CSensor.getPort();
                             break;
@@ -174,7 +174,7 @@ public class MonitorSensorsThread extends Thread {
                             className = sensorClasses.get(key);
                             sensor = constructSensorObject(className, AnalogPort.class, analogPort);
 
-                            sensorEventListener.newSensor(sensor, className, i);
+                            sensorEventListener.newSensor(className, i);
                             addSensorAtEntry(i, sensor);
                             connectedPortsArray[i] = analogPort;
                             break;

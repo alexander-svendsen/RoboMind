@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import lejos.hardware.Battery;
 import lejos.hardware.Button;
 import src.motor.MotorControl;
-import src.sensor.MonitorSensorsThread;
 import src.sensor.SensorControl;
 import src.util.HostName;
 import src.util.Request;
@@ -33,12 +32,11 @@ public class RoboMindStartup {
             }
 
             @Override
-            public synchronized void newSensor(Object sensorObject, String sensorClassName, int portNumber) {
+            public synchronized void newSensor(String sensorClassName, int portNumber) {
                 res.reset();
-                res.msg = "new_sensor";
+                res.msg = "sensor_info";
                 res.sample_string = sensorClassName;
                 res.data = portNumber;
-
                 sendData();
             }
 
@@ -54,7 +52,7 @@ public class RoboMindStartup {
             @Override
             public synchronized void newSamples(float[][] sampleArray) {
                 res.reset();
-                res.msg = "fetch_sample";
+                res.msg = "samples";
                 res.samples =  sampleArray;
 
                 sendData();
@@ -64,11 +62,10 @@ public class RoboMindStartup {
 
 //        new TuneThread().start(); //Tune to know that the program has started
 
-//        SensorTests s = new SensorTests();
-        SensorControl sensorControl = new SensorControl();
+        SensorControl sensorControl = new SensorControl(sensorEventListener);
         communication = new Communication();
-        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-        monitorSensorsThread.setSensorEventListener(sensorEventListener);
+//        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
+//        monitorSensorsThread.setSensorEventListener(sensorEventListener);
 
 //        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
 //        sampleThread.setListener(sensorEventListener);
@@ -86,8 +83,6 @@ public class RoboMindStartup {
 //        sampleThread.start();
 //        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
-        //TODO do while?
-        //TODO remove data field if there is no data
         String command;
         Request data;
         Response response = new Response();
@@ -101,8 +96,8 @@ public class RoboMindStartup {
                 Button.LEDPattern(9);
                 mc.reset();
                 sensorControl.reset();
-                monitorSensorsThread.exit();
-                monitorSensorsThread = new MonitorSensorsThread();
+//                monitorSensorsThread.exit();
+//                monitorSensorsThread = new MonitorSensorsThread();
                 communication.close();
                 communication.setUpConnection();
                 Button.LEDPattern(1);  // fixme  maybe move inside communication
@@ -198,13 +193,14 @@ public class RoboMindStartup {
             }
             else if (data.cla.equals("subscribe")){
                 if (data.cmd.equals("subscribe_on_sensor_changes")){
-                    monitorSensorsThread.start();
+//                    monitorSensorsThread.start();
+                    sensorControl.startMonitorThread();
                 }
                 else if(data.cmd.equals("subscribe_on_stream_data")){
                     //TODO
                 }
                 else if(data.cmd.equals("close")){
-                    monitorSensorsThread.exit();
+//                    monitorSensorsThread.exit();
 
                 }
                 continue; // REVIEW: hmmmm

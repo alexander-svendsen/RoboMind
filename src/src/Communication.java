@@ -103,6 +103,7 @@ public class Communication {
 
         try {
             synchronized (lock){
+                System.out.println("Waiting for connections");
                 lock.wait();
             }
         } catch (InterruptedException e) {
