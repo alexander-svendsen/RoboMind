@@ -64,12 +64,6 @@ public class RoboMindStartup {
 
         SensorControl sensorControl = new SensorControl(sensorEventListener);
         communication = new Communication();
-//        MonitorSensorsThread monitorSensorsThread = new MonitorSensorsThread();
-//        monitorSensorsThread.setSensorEventListener(sensorEventListener);
-
-//        SampleThread sampleThread = new SampleThread(monitorSensorsThread);
-//        sampleThread.setListener(sensorEventListener);
-
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 Button.LEDPattern(0);
@@ -80,8 +74,6 @@ public class RoboMindStartup {
         Button.LEDPattern(9);
         communication.setUpConnection();
         Button.LEDPattern(1);
-//        sampleThread.start();
-//        sensorEventListener.initialize();  // force the objects into memory, quicker building later
 
         String command;
         Request data;
@@ -181,7 +173,7 @@ public class RoboMindStartup {
                     response.data = sensorControl.callMethod(data.sensor_port, data.method) ? 1 : 0;
                 }
                 else if(data.cmd.equals("get_sensor_type")){
-                    response.sample_string = sensorControl.getSensorAtPort(data.sensor_port);
+                    response.sample_string = sensorControl.dynamicallyDiscoverSensorNameAtPort(data.sensor_port);
                 }
                 else{
                     throw new IOException("Invalid command");
@@ -198,6 +190,7 @@ public class RoboMindStartup {
                 }
                 else if(data.cmd.equals("subscribe_on_stream_data")){
                     //TODO
+                    sensorControl.startSampleThread();
                 }
                 else if(data.cmd.equals("close")){
 //                    monitorSensorsThread.exit();

@@ -2,7 +2,6 @@ package src.sensor;
 
 import lejos.hardware.port.Port;
 import lejos.hardware.port.UARTPort;
-import lejos.hardware.sensor.BaseSensor;
 import lejos.hardware.sensor.EV3SensorConstants;
 import lejos.hardware.sensor.I2CSensor;
 import src.SensorEventListener;
@@ -31,7 +30,7 @@ public class SensorDiscovery extends Thread{
     	 * Note: For now only support the sensors we possess, left as future work to extend this.
     	 */
 //        sensorClasses.put("119",                "AnalogSensor");
-        sensorClasses.put("121",                "EV3TouchSensor");
+//        sensorClasses.put("121",                "EV3TouchSensor");
         sensorClasses.put("IR-PROX",            "EV3IRSensor");
         sensorClasses.put("COL-REFLECT",        "EV3ColorSensor");
         sensorClasses.put("GYRO-ANG",           "EV3GyroSensor");
@@ -53,11 +52,7 @@ public class SensorDiscovery extends Thread{
                 if (sensorTracker.currentSensorTypeArray[i] != sensorType) {
                     System.out.println("Port " + i + " changed to " + sensorType);
                     sensorTracker.currentSensorTypeArray[i] = sensorType;
-                    //disconnectOldSensorAtEntry(i);
                     className = getSensorClassName(i, sensorType);
-                    if (sensorClasses.containsValue(className)){  //review
-                        sensorTracker.sensorArray[i] = (BaseSensor)constructSensorObject(className, i);
-                    }
                     sensorEventListener.newSensor(className, i);
                 }
             }
@@ -146,7 +141,7 @@ public class SensorDiscovery extends Thread{
     }
 
     public void exit(){
-        interrupt();
         running = false;
+        interrupt();
     }
 }

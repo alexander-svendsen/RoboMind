@@ -3,36 +3,29 @@ package src.sensor;
 import lejos.hardware.sensor.BaseSensor;
 import src.SensorEventListener;
 
-/**
- * Categorize the different sensors and will give the correct sensor if only a analog is discovered
- * Can discover dynamically the sensor type
- * Can set the specific type as well, altough an error would be returned if a mistake
- */
+
 public class SensorControl {
-    //Not really a fan of hard-coded values, but EV3 always has 4 sensors ports anyway
     SensorTracker sensorTracker = new SensorTracker();
     SensorEventListener sensorEventListener;
     SensorDiscovery sensorDiscovery;
+    SampleThread sampleThread;
+
     public SensorControl(SensorEventListener sensorEventListener){
         this.sensorEventListener = sensorEventListener;
         this.sensorDiscovery = new SensorDiscovery(sensorTracker, sensorEventListener);
+        this.sampleThread = new SampleThread(sensorTracker, sensorEventListener);
     }
 
-    public String getSensorAtPort(int portNumber){
+    public String dynamicallyDiscoverSensorNameAtPort(int portNumber){
         return sensorDiscovery.getSensorClassName(portNumber);
     }
 
-    public boolean openSensorByNameOnPort(String sensorName, int portNumber){ //Fixme: should detect wheter the type is the same as the one there and simply open it
+    public boolean openSensorByNameOnPort(String sensorName, int portNumber){
         synchronized (sensorTracker.openSensorLock){
-            if (sensorTracker.sensorArray[portNumber] != null){
-                return ((sensorName).equals(sensorTracker.sensorArray[portNumber].getClass().getSimpleName()));
-            }
-
             BaseSensor temp = (BaseSensor)sensorDiscovery.constructSensorObject(sensorName, portNumber);
             if (temp !=null){
-                sensorTracker.sensorArray[portNumber] = temp;
+                sensorTracker.setSensorAtPort(portNumber, temp);
                 setSensorModes(portNumber, 0);
-                sensorTracker.currentSensorTypeArray[portNumber] = SensorTracker.port[portNumber].getPortType();
                 return true;
             }
             return false;
@@ -40,7 +33,7 @@ public class SensorControl {
     }
 
     public void setSensorModes(int port, int mode){
-        sensorTracker.sensorMode[port] = sensorTracker.sensorArray[port].getMode(mode);
+        sensorTracker.sensorMode[port] = sensorTracker.getSensorAtPort(port).getMode(mode);
         sensorTracker.sampleProvider[port] =  new float[sensorTracker.sensorMode[port].sampleSize()];
     }
 
@@ -59,15 +52,20 @@ public class SensorControl {
             }
             sensorDiscovery = new SensorDiscovery(sensorTracker, sensorEventListener);
         }
+        if (sampleThread.isAlive()){
+            sampleThread.exit();
+            try {
+                sampleThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sampleThread = new SampleThread(sensorTracker, sensorEventListener);
+        }
         sensorTracker.reset();
     }
 
     public void close(int port){
-        if (sensorTracker.sensorArray[port] != null){
-            sensorTracker.sensorArray[port].close();
-            sensorTracker.sensorArray[port] = null;
-            sensorTracker.sensorMode[port] = null;
-        }
+        sensorTracker.closeSensorAtPort(port);
     }
 
     public boolean callMethod(int sensorPort, String methodName) {
@@ -83,5 +81,9 @@ public class SensorControl {
 
     public void startMonitorThread(){
         sensorDiscovery.start();
+    }
+
+    public void startSampleThread() {
+        sampleThread.start();
     }
 }
