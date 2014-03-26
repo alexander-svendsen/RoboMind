@@ -15,7 +15,6 @@ public class MotorControl {
     }
 
     public void openPorts(){
-        //Review not really memory efficent
         motors.put("A", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("A")));
         motors.put("B", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("B")));
         motors.put("C", new NXTRegulatedMotor(BrickFinder.getDefault().getPort("C")));
@@ -35,15 +34,11 @@ public class MotorControl {
     }
 
     public void rotate(String motorPort, int degrees, boolean immediateReturn){
-//        System.out.println(motors.get(motorPort).getLimitAngle());
         motors.get(motorPort).rotate(degrees, immediateReturn);
-//        System.out.println(motors.get(motorPort).getLimitAngle());
     }
 
     public void rotateTo(String motorPort, int angle, boolean immediateReturn){
-//        System.out.println(motors.get(motorPort).getLimitAngle());
         motors.get(motorPort).rotateTo(angle, immediateReturn);
-//        System.out.println(motors.get(motorPort).getLimitAngle());
     }
 
     public void setSpeed(String motorPort, float speed){
@@ -86,12 +81,16 @@ public class MotorControl {
         return motors.get(motorPort).getMaxSpeed();
     }
 
-    public void reset(){
+    public void closeMotors(){
         motors.get("A").close();
         motors.get("B").close();
         motors.get("C").close();
         motors.get("D").close();
-        this.openPorts();
+    }
+
+    public void reset(){
+        closeMotors();
+        openPorts();
     }
 
 }

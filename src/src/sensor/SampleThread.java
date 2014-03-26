@@ -44,14 +44,16 @@ public class SampleThread extends Thread {
     private void getSamples() {
         SampleProvider sampleProvider;
         for(int i = 0; i < sensorTracker.sensorArray.length; i++) {
-            if (sensorTracker.sensorArray[i] != null) {
-                    sampleProvider = sensorTracker.sensorMode[i]; //FIXME: THINK A RACE CONDITION HAPPENS HERE
+            synchronized (sensorTracker.openLock){
+                if (sensorTracker.sensorArray[i] != null) {
+                    sampleProvider = sensorTracker.sensorMode[i];
                     if (sampleArray[i] == null){
                         sampleArray[i] = new float[sampleProvider.sampleSize()];
                     }
                     sampleProvider.fetchSample(sampleArray[i], 0);
-            }else{
-                sampleArray[i] = null;
+                }else{
+                    sampleArray[i] = null;
+                }
             }
         }
     }

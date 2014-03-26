@@ -16,6 +16,7 @@ public class SensorTracker {
     int [] currentSensorTypeArray = new int[4];
 
     final Object openSensorLock = new Object();  //Fixme, should a lock per port
+    final Object openLock = new Object();
     public final Object noSensorLock = new Object();
 
     int numberOfConnectedSensors = 0;
@@ -23,6 +24,7 @@ public class SensorTracker {
     public BaseSensor getSensorAtPort(int position){
         return sensorArray[position];
     }
+
 
     public void setSensorAtPort(int port, BaseSensor baseSensor){
         sensorArray[port] = baseSensor;

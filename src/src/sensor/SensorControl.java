@@ -24,8 +24,10 @@ public class SensorControl {
         synchronized (sensorTracker.openSensorLock){
             BaseSensor temp = (BaseSensor)sensorDiscovery.constructSensorObject(sensorName, portNumber);
             if (temp !=null){
-                sensorTracker.setSensorAtPort(portNumber, temp);
-                setSensorModes(portNumber, 0);
+                synchronized (sensorTracker.openLock){
+                    sensorTracker.setSensorAtPort(portNumber, temp);
+                    setSensorModes(portNumber, 0);
+                }
                 return true;
             }
             return false;
@@ -42,7 +44,7 @@ public class SensorControl {
         return sensorTracker.sampleProvider[portNumber];
     }
 
-    public void reset() {
+    public void resetThreads(){
         if (sensorDiscovery.isAlive()){
             sensorDiscovery.exit();
             try {
@@ -61,6 +63,10 @@ public class SensorControl {
             }
             sampleThread = new SampleThread(sensorTracker, sensorEventListener);
         }
+    }
+
+    public void reset() {
+        resetThreads();
         sensorTracker.reset();
     }
 

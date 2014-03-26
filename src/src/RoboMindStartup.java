@@ -21,59 +21,52 @@ public class RoboMindStartup {
     static boolean running = true;
     static Communication communication;
 
+    static SensorEventListener sensorEventListener = new SensorEventListener() {
+        Response res = new Response();
+
+        public void sendData(){
+            communication.send(gson.toJson(res));
+        }
+
+        @Override
+        public void newSensor(String sensorClassName, int portNumber) {
+            res.reset();
+            res.msg = "sensor_info";
+            res.sample_string = sensorClassName;
+            res.data = portNumber;
+            sendData();
+        }
+
+        @Override
+        public void newSamples(float[][] sampleArray) {
+            res.reset();
+            res.msg = "samples";
+            res.samples =  sampleArray;
+            sendData();
+        }
+    };
+
+    public static void startUpCommunication(){
+        Button.LEDPattern(9);
+        communication.setUpConnection();
+        Button.LEDPattern(1);
+    }
+
     public static void main(String[] args) throws IOException {
         System.out.println("RoboMind started");
-
-        SensorEventListener sensorEventListener = new SensorEventListener() {
-            Response res = new Response();
-
-            public void sendData(){
-                communication.send(gson.toJson(res));
-            }
-
-            @Override
-            public synchronized void newSensor(String sensorClassName, int portNumber) {
-                res.reset();
-                res.msg = "sensor_info";
-                res.sample_string = sensorClassName;
-                res.data = portNumber;
-                sendData();
-            }
-
-            @Override
-            public synchronized void newInfo(String cmd, int portNumber) {
-                res.reset();
-                res.msg = cmd;
-                res.data = portNumber;
-
-                sendData();
-            }
-
-            @Override
-            public synchronized void newSamples(float[][] sampleArray) {
-                res.reset();
-                res.msg = "samples";
-                res.samples =  sampleArray;
-
-                sendData();
-            }
-        };
-
-
-//        new TuneThread().start(); //Tune to know that the program has started
-
-        SensorControl sensorControl = new SensorControl(sensorEventListener);
-        communication = new Communication();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 Button.LEDPattern(0);
             }
         });
-        MotorControl mc = new MotorControl();
 
-        Button.LEDPattern(9);
-        communication.setUpConnection();
-        Button.LEDPattern(1);
+//        new TuneThread().start(); //Tune to know that the program has started
+
+        communication = new Communication();
+        SensorControl sensorControl = new SensorControl(sensorEventListener);
+        MotorControl motorControl = new MotorControl();
+
+        startUpCommunication();
 
         String command;
         Request data;
@@ -85,14 +78,10 @@ public class RoboMindStartup {
                     throw new IOException();
                 }
             } catch (Exception e) {
-                Button.LEDPattern(9);
-                mc.reset();
+                motorControl.reset();
                 sensorControl.reset();
-//                monitorSensorsThread.exit();
-//                monitorSensorsThread = new MonitorSensorsThread();
                 communication.close();
-                communication.setUpConnection();
-                Button.LEDPattern(1);  // fixme  maybe move inside communication
+                startUpCommunication();
                 continue;
             }
 
@@ -104,52 +93,52 @@ public class RoboMindStartup {
             response.msg = "response";
             if (data.cla.equals("motor")){
                 if (data.cmd.equals("forward")){
-                    mc.forward(data.motor_port);
+                    motorControl.forward(data.motor_port);
                 }
                 else if (data.cmd.equals("backward")){
-                    mc.backward(data.motor_port);
+                    motorControl.backward(data.motor_port);
                 }
                 else if (data.cmd.equals("stop")){
-                    mc.stop(data.motor_port, data.immediate);
+                    motorControl.stop(data.motor_port, data.immediate);
                 }
                 else if (data.cmd.equals("rotate")){
-                    mc.rotate(data.motor_port, data.degrees, data.immediate);
+                    motorControl.rotate(data.motor_port, data.degrees, data.immediate);
                 }
                 else if (data.cmd.equals("rotate_to")){
-                    mc.rotateTo(data.motor_port, data.degrees, data.immediate);
+                    motorControl.rotateTo(data.motor_port, data.degrees, data.immediate);
                 }
                 else if (data.cmd.equals("set_speed")){
-                    mc.setSpeed(data.motor_port, data.speed);
+                    motorControl.setSpeed(data.motor_port, data.speed);
                 }
                 else if (data.cmd.equals("set_acceleration")){
-                    mc.setAcceleration(data.motor_port, data.acceleration);
+                    motorControl.setAcceleration(data.motor_port, data.acceleration);
                 }
                 else if (data.cmd.equals("set_stalled_threshold")){
-                    mc.setStallhreshold(data.motor_port, data.error, data.time);
+                    motorControl.setStallhreshold(data.motor_port, data.error, data.time);
                 }
                 else if (data.cmd.equals("reset_tacho_count")){
-                    mc.resetTachoCount(data.motor_port);
+                    motorControl.resetTachoCount(data.motor_port);
                 }
                 else if (data.cmd.equals("set_float_mode")){
-                    mc.setFloatMode(data.motor_port);
+                    motorControl.setFloatMode(data.motor_port);
                 }
                 else if (data.cmd.equals("get_tacho_count")){
-                    response.data = mc.getTachoCount(data.motor_port);
+                    response.data = motorControl.getTachoCount(data.motor_port);
                 }
                 else if (data.cmd.equals("get_position")){
-                    response.data = mc.getPosition(data.motor_port);
+                    response.data = motorControl.getPosition(data.motor_port);
 
                 }
                 else if (data.cmd.equals("is_moving")){
-                    response.data = mc.isMoving(data.motor_port) ? 1 : 0;
+                    response.data = motorControl.isMoving(data.motor_port) ? 1 : 0;
 
                 }
                 else if (data.cmd.equals("is_stalled")){
-                    response.data = mc.isStalled(data.motor_port) ? 1 : 0;
+                    response.data = motorControl.isStalled(data.motor_port) ? 1 : 0;
 
                 }
                 else if (data.cmd.equals("get_max_speed")){
-                    response.data = mc.getMaxSpeed(data.motor_port);
+                    response.data = motorControl.getMaxSpeed(data.motor_port);
 
                 }
                 else{
@@ -185,18 +174,14 @@ public class RoboMindStartup {
             }
             else if (data.cla.equals("subscribe")){
                 if (data.cmd.equals("subscribe_on_sensor_changes")){
-//                    monitorSensorsThread.start();
                     sensorControl.startMonitorThread();
                 }
                 else if(data.cmd.equals("subscribe_on_stream_data")){
-                    //TODO
                     sensorControl.startSampleThread();
                 }
                 else if(data.cmd.equals("close")){
-//                    monitorSensorsThread.exit();
-
+                    sensorControl.resetThreads();
                 }
-                continue; // REVIEW: hmmmm
             }
             else{
                 throw new IOException("Invalid class");
