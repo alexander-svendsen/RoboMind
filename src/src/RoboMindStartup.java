@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lejos.hardware.Battery;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import src.motor.MotorControl;
 import src.sensor.SensorControl;
 import src.util.HostName;
@@ -78,14 +79,15 @@ public class RoboMindStartup {
                     throw new IOException();
                 }
             } catch (Exception e) {
-                motorControl.reset();
                 sensorControl.reset();
+                motorControl.closeMotors();
                 communication.close();
                 startUpCommunication();
+                motorControl.openPorts();
                 continue;
             }
 
-            System.out.println(command);
+//            System.out.println(command);
             data = gson.fromJson(command, Request.class);
 
             response.reset();
@@ -171,6 +173,17 @@ public class RoboMindStartup {
             else if (data.cla.equals("status")){
                 response.data = Battery.getVoltageMilliVolt();
                 response.sample_string = HostName.getHostName();
+            }
+            else if (data.cla.equals("sound")){
+                if (data.cmd.equals("play_tone")){
+                    Sound.playTone(data.frequency, data.time);
+                }
+                else if(data.cmd.equals("buzz")){
+                    Sound.buzz();
+                }
+                else if(data.cmd.equals("beep")){
+                    Sound.beep();
+                }
             }
             else if (data.cla.equals("subscribe")){
                 if (data.cmd.equals("subscribe_on_sensor_changes")){

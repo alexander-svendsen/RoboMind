@@ -18,4 +18,6 @@ public class Request {
     public String sensor_class_name = "";
     public int mode;
     public String method = "";
+
+    public int frequency = 0;
 }
