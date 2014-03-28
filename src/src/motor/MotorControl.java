@@ -49,7 +49,7 @@ public class MotorControl {
         motors.get(motorPort).setAcceleration(acceleration);
     }
 
-    public void setStallhreshold(String motorPort, int error, int time){
+    public void setStallThreshold(String motorPort, int error, int time){
         motors.get(motorPort).setStallThreshold(error, time);
     }
 

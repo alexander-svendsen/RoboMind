@@ -12,11 +12,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/**
- * Note:
- *  - Thread or not ?
- *  - Don't think i need more then one open socket connection
- */
+
 public class Communication {
     private ServerSocket serverSocket;
     private Socket client;
@@ -68,7 +64,6 @@ public class Communication {
             }catch(IOException e){
                 e.printStackTrace(); //ignore
             }
-
         }
     }
 
@@ -85,7 +80,6 @@ public class Communication {
                 connectionEstablished = true;
                 lock.notifyAll();
             }
-
         }
     }
 
@@ -110,7 +104,6 @@ public class Communication {
             e.printStackTrace();
         }
     }
-
 
     public String receive() throws IOException{
         return bufferedReader.readLine();  //must contain a \n to be a valid line to receive
