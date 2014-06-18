@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="RoboMind" basedir="." default="copy">
+<project name="Robo" basedir="." default="copy">
     <property name="source.dir"     value="src"/>
     <property name="lib.dir"        value="../../git/ev3/ev3classes"/>
     <property name="gson.lib"       value="src/lib/gson"/>
     <property name="class.dir"      value="build"/>
     <property name="jar.dir"        value="dist"/>
-    <property name="main-class"     value="src.RoboMindStartup"/>
+    <property name="main-class"     value="src.RoboStartup"/>
     <property name="lejos.home"     value="/home/root/lejos"/>
     <property name="jna.dir"        value="../../git/ev3/ev3classes/lib"/>
     <property name="ev3.host"       value="10.0.1.1"/>

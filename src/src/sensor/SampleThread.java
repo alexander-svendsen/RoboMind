@@ -24,7 +24,6 @@ public class SampleThread extends Thread {
                 waitUntilThereAreSensorsConnected();
                 getSamples();
                 sensorEventListener.newSamples(sampleArray);
-                sleep(5); // may not need, but look into it, should be wait actually
             }
         }catch (InterruptedException e){
             //wait was interrupted, but there is no real problem with that

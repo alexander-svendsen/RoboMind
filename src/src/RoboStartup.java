@@ -5,9 +5,9 @@ import com.google.gson.GsonBuilder;
 import lejos.hardware.Battery;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import src.lib.BroadcastThread;
 import src.motor.MotorControl;
 import src.sensor.SensorControl;
-import src.util.HostName;
 import src.util.Request;
 import src.util.Response;
 
@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * The starting point of the program
  */
-public class RoboMindStartup {
+public class RoboStartup {
 
     static Gson gson = new GsonBuilder().create();
     static boolean running = true;
@@ -61,7 +61,7 @@ public class RoboMindStartup {
     public static void main(String[] args) throws IOException {
 //        LCDControl lcdControl = new LCDControl();
 
-        System.out.println("RoboMind started");
+        System.out.println("Robo started");
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 Button.LEDPattern(0);
@@ -76,23 +76,21 @@ public class RoboMindStartup {
                 if (command == null){
                     throw new IOException();
                 }
+                data = gson.fromJson(command, Request.class);
+
+                response.reset();
+                response.seq = data.seq;
+                response.msg = "response";
+                parseAndRunCommand();
+                communication.send(gson.toJson(response));
+
             } catch (Exception e) {
                 sensorControl.reset();
                 motorControl.closeMotors();
                 communication.close();
                 startUpCommunication();
                 motorControl.openPorts();
-                continue;
             }
-//            System.out.println(command);
-            data = gson.fromJson(command, Request.class);
-            response.reset();
-            response.seq = data.seq;
-            response.msg = "response";
-
-            parseAndRunCommand();
-
-            communication.send(gson.toJson(response));
         }
 
         communication.shutdown();
@@ -178,7 +176,7 @@ public class RoboMindStartup {
         }
         else if (data.cla.equals("status")){
             response.data = Battery.getVoltageMilliVolt();
-            response.sample_string = HostName.getHostName();
+            response.sample_string = BroadcastThread.getHostName();
         }
         else if (data.cla.equals("sound")){
             if (data.cmd.equals("play_tone")){
@@ -202,8 +200,8 @@ public class RoboMindStartup {
                 sensorControl.resetThreads();
             }
         }
-        else{
-            throw new IOException("Invalid class");
+        else if (data.cla.equals("ping")){
+            response.sample_string = "pong";
         }
     }
 }

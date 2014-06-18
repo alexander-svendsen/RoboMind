@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
 
+/**
+ * Note: Code taken from the leJOS open source git project: EV3Menu
+ * It has been tweaked to remove a bug found in the code.
+ */
 public class Broadcast {
 
     public static final int port = 9200;
 
-    //TODO: really uneffical usage of sockets..., got a problem with it at a later time
 	public static void broadcast(String message) {
 		DatagramSocket c = null;
 		try {

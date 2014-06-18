@@ -11,11 +11,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 /**
- * Class for dynamic discovering what sensors are connected to which port
+ * Thread for dynamic discovering what sensors are connected to which port
+ * Solution is based on code taken from the leJOS source git project: EV3SensorMonitor.
+ * It has been redesigned to be used in this project.
  */
 public class SensorDiscovery extends Thread{
 
-    private HashMap<String,String> sensorClasses = new HashMap<String,String>();
+    private HashMap<String,String> mapFromModeNameTosensorClasses = new HashMap<String,String>();
 
     int sensorType;
     UARTPort uartPort;
@@ -29,22 +31,20 @@ public class SensorDiscovery extends Thread{
         /*
     	 * Note: For now only support the sensors we possess, left as future work to extend this.
     	 */
-//        sensorClasses.put("119",                "AnalogSensor");
-//        sensorClasses.put("121",                "EV3TouchSensor");
-        sensorClasses.put("IR-PROX",            "EV3IRSensor");
-        sensorClasses.put("COL-REFLECT",        "EV3ColorSensor");
-        sensorClasses.put("GYRO-ANG",           "EV3GyroSensor");
-        sensorClasses.put("US-DIST-CM",         "EV3UltrasonicSensor");
-        sensorClasses.put("LEGOSonar",          "NXTUltrasonicSensor");
-        sensorClasses.put("HiTechncColor   ",   "HiTechnicColorSensor");
-        sensorClasses.put("HITECHNCAccel.  ",   "HiTechnicAccelerometer");
-        sensorClasses.put("HiTechncCompass ",   "HiTechnicCompass");
-        sensorClasses.put("HiTechncIR Dir. ",   "HiTechnicIRSeeker");
+        mapFromModeNameTosensorClasses.put("IR-PROX", "EV3IRSensor");
+        mapFromModeNameTosensorClasses.put("COL-REFLECT", "EV3ColorSensor");
+        mapFromModeNameTosensorClasses.put("GYRO-ANG", "EV3GyroSensor");
+        mapFromModeNameTosensorClasses.put("US-DIST-CM", "EV3UltrasonicSensor");
+        mapFromModeNameTosensorClasses.put("LEGOSonar", "NXTUltrasonicSensor");
+        mapFromModeNameTosensorClasses.put("HiTechncColor   ", "HiTechnicColorSensor");
+        mapFromModeNameTosensorClasses.put("HITECHNCAccel.  ", "HiTechnicAccelerometer");
+        mapFromModeNameTosensorClasses.put("HiTechncCompass ", "HiTechnicCompass");
+        mapFromModeNameTosensorClasses.put("HiTechncIR Dir. ", "HiTechnicIRSeeker");
         this.sensorTracker = sensorTracker;
         this.sensorEventListener = sensorEventListener;
     }
 
-    public void monitorSensorPorts(){
+    public void sendNewConnectedSensors(){
         String className;
         for(int i = 0; i < SensorTracker.port.length; i++) {
             synchronized (sensorTracker.openSensorLock){
@@ -66,10 +66,10 @@ public class SensorDiscovery extends Thread{
                 uartPort = SensorTracker.port[portNumber].open(UARTPort.class);
                 uartPort.initialiseSensor(0); // Don't get any info from the sensor if we don't initialize it first
                 //Need to trim the modeName, since it sometimes adds trailing whitespace. Seems like a bug.
-                modeName = uartPort.getModeName(0).trim(); //FIXME should ignore it
+                modeName = uartPort.getModeName(0).trim();
                 System.out.println(uartPort.getModeName(0).trim());
                 uartPort.close();
-                return sensorClasses.get(modeName);
+                return mapFromModeNameTosensorClasses.get(modeName);
 
             case(EV3SensorConstants.CONN_NXT_IIC):
                 i2CSensor = new I2CSensor(SensorTracker.port[portNumber]);
@@ -78,7 +78,7 @@ public class SensorDiscovery extends Thread{
                 i2CSensor.close();
 
                 //There is also lots of whitespaces here, but ignore it for now. Save resources
-                return sensorClasses.get(vendor + product);
+                return mapFromModeNameTosensorClasses.get(vendor + product);
 
             case(EV3SensorConstants.CONN_NONE):
                 return "None";
@@ -101,12 +101,12 @@ public class SensorDiscovery extends Thread{
 
     public Object constructSensorObject(String className, int portNumber) {
         if (className != null) {
-            Class<?> c;
+            Class<?> klass;
             try {
-                c = Class.forName("lejos.hardware.sensor." + className);
+                klass = Class.forName("lejos.hardware.sensor." + className);
                 Class<?>[] params = new Class<?>[1];
                 params[0] = Port.class;
-                Constructor<?> con = c.getConstructor(params);
+                Constructor<?> con = klass.getConstructor(params);
                 Object[] args = new Object[1];
                 args[0] = SensorTracker.port[portNumber];
                 return con.newInstance(args);
@@ -131,7 +131,7 @@ public class SensorDiscovery extends Thread{
         try {
             running = true;
             while(running){
-                monitorSensorPorts();
+                sendNewConnectedSensors();
                 sleep(5000);
             }
         }

@@ -3,7 +3,6 @@ package src;
 import lejos.remote.nxt.BTConnector;
 import lejos.remote.nxt.NXTConnection;
 import src.lib.BroadcastThread;
-import src.util.HostName;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,8 +37,7 @@ public class Communication {
             btThread.start();
 
             //starts a udp discovery protocol
-            String hostname = HostName.getHostName();
-            BroadcastThread bt = new BroadcastThread(hostname);
+            BroadcastThread bt = new BroadcastThread();
             bt.start();
         }catch(IOException e){
             e.printStackTrace();
@@ -114,7 +112,7 @@ public class Communication {
         printWriter.flush();
     }
 
-    public void closeStreams() throws IOException {
+    public void closeStreams() throws Exception {
         bufferedReader.close();
         printWriter.close();
     }
@@ -130,8 +128,8 @@ public class Communication {
                 closeStreams();
             }
 
-        }catch (IOException e){
-            e.printStackTrace(); //ignore
+        }catch (Exception e){
+//            e.printStackTrace(); //ignore
         }
     }
 
@@ -141,7 +139,7 @@ public class Communication {
             serverSocket.close();
             btConnector.cancel();
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
     }

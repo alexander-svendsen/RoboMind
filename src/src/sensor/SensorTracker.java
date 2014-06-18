@@ -15,7 +15,7 @@ public class SensorTracker {
     float[][] sampleProvider = new float[4][];  //Gives us a reusable sample provider, spare some computation power
     int [] currentSensorTypeArray = new int[4];
 
-    final Object openSensorLock = new Object();  //Fixme, should a lock per port
+    final Object openSensorLock = new Object();
     final Object openLock = new Object();
     public final Object noSensorLock = new Object();
 
